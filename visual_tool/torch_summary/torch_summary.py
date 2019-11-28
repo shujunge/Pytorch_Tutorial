@@ -50,7 +50,6 @@ def summary(model, input_size):
 	# register hook
 	model.apply(register_hook)
 	# make a forward pass
-
 	model(x)
 	# remove these hooks
 	for h in hooks:
