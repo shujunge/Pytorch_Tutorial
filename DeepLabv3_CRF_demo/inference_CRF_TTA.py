@@ -34,11 +34,35 @@ output_dir = "./results"
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
+
+def TTA_inference(x, model, hfilp=True, vflip= False):
+    """
+    :param x: torch.float (N,C,H,W)
+    :param model: torch model
+    :param hfilp: bool True, False
+    :param vflip: bool True, False
+    :return: (N,C,H,W)
+    """
+    images = x.to(device)
+    model.to(device)
+    pred = model(images)['out']
+    count = 1
+    if hfilp:
+        input_batch = images.flip(3)
+        pred += model(input_batch)['out'].flip(3)
+        count += 1
+    if vflip:
+        input_batch = images.flip(2)
+        pred += model(input_batch)['out'].flip(2)
+        count += 1
+
+    return  pred/count
+
+
+
 with torch.no_grad():
     test_images = images.unsqueeze(0).float()
-    input_batch = test_images.to(device)
-    model.to(device)
-    pred = model(input_batch)['out']
+    pred = TTA_inference(test_images, model)
     out_pred = pred[0]
     out_pred = out_pred.argmax(0)
     out_pred = out_pred.data.cpu().numpy()
@@ -46,8 +70,8 @@ with torch.no_grad():
     plt.figure(figsize=(6,6))
     plt.subplot(121)
     plt.imshow(out_pred)
-    plt.title("without_CRF")
-    cv2.imwrite("%s/without_CRF_result.png" % output_dir, out_pred)
+    plt.title("without_CRF_TTA")
+    cv2.imwrite("%s/without_CRF_TTA_result.png" % output_dir, out_pred)
 
     zz = out_pred.copy()
     images = images.data.cpu().numpy().astype(np.uint8).transpose(1, 2, 0)
@@ -55,9 +79,9 @@ with torch.no_grad():
     print(np.unique(crf_output))
     plt.subplot(122)
     plt.imshow(crf_output)
-    plt.title("with_CRF")
-    cv2.imwrite("%s/with_CRF_results.png"% output_dir, crf_output)
+    plt.title("with_CRF_TTA")
+    cv2.imwrite("%s/with_CRF_TTA_results.png"% output_dir, crf_output)
     print("differt:", (out_pred-crf_output).sum())
-    plt.savefig("%s/results.png" % output_dir, dpi=300)
+    plt.savefig("%s/TTA_results.png" % output_dir, dpi=300)
     plt.show()
 
