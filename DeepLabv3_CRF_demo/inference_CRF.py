@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # plt.switch_backend('agg')
 import cv2
 import shutil
-from srcs.segment_model import deeplabv3_resnet101
+from srcs.segment_model import deeplabv3_resnet101, fcn_resnet101
 from srcs.DenseCRF import my_post_CRF
 
 
@@ -19,10 +19,11 @@ input_transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
-model = deeplabv3_resnet101(pretrained=True)
+# model = deeplabv3_resnet101(pretrained=True)
+model = fcn_resnet101(pretrained=True)
 model.eval()
 
-images = cv2.imread("test_image.jpg", -1)
+images = cv2.imread("12.jpg", -1)
 images = cv2.cvtColor(images, cv2.COLOR_BGR2RGB)
 images = input_transform(images)
 
