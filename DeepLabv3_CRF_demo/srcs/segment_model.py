@@ -182,6 +182,17 @@ def deeplabv3_resnet101(pretrained=False, progress=True,
     return _load_model('deeplabv3', 'resnet101', pretrained, progress, num_classes, aux_loss, **kwargs)
 
 
+def fcn_resnet101(pretrained=False, progress=True,
+                        num_classes=21, aux_loss=None, **kwargs):
+    """Constructs a DeepLabV3 model with a ResNet-101 backbone.
+    Args:
+        pretrained (bool): If True, returns a model pre-trained on COCO train2017 which
+            contains the same classes as Pascal VOC
+        progress (bool): If True, displays a progress bar of the download to stderr
+    """
+    return _load_model('fcn', 'resnet101', pretrained, progress, num_classes, aux_loss, **kwargs)
+
+
 if __name__=="__main__":
 
     import torch
