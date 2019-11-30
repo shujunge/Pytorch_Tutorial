@@ -10,3 +10,4 @@ imgaug
 Augmentor
 opencv-python
 solt
+opencv_transforms
