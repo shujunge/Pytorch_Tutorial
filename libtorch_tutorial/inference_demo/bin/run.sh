@@ -1,6 +1,5 @@
+cd ../ && mkdir release && cd ./release && cmake .. && make &&cd ../ && rm -rf release && cd ./bin
 
-cd ../release&& rm -rf ./* &&cmake .. && make  && rm -rf ./* && cd ../bin
+python resnet18_classification.py &&./out resnet18_model.pt dog.png synset_words.txt
 
-python my_model.py &&./out my_model.pt
-
-
+rm out resnet18_model.pt
