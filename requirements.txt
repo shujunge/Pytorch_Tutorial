@@ -1,0 +1,13 @@
+torch
+torchvision
+albumentations
+pillow
+numpy
+pydensecrf
+matplotlib
+pandas
+imgaug
+Augmentor
+opencv-python
+solt
+opencv_transforms
