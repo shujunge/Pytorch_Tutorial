@@ -90,7 +90,7 @@ int main(int argc, const char* argv[])
     //std::cout << "C++ inference results:"<<out_tensor<< '\n';
     std::cout << "the last results:"<<out_tensor[511][511].item<int>()<< '\n';
     cv::Mat results = tensorToMat(out_tensor);
-    cv::imwrite("results/c++_infernce.png",results);
+    cv::imwrite("results/c++_inference.png",results);
     return 0;
 }
 
