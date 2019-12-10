@@ -23,7 +23,7 @@ input_transform = transforms.Compose([
 model = fcn_resnet101(pretrained=True)
 model.eval()
 
-images = cv2.imread("12.jpg", -1)
+images = cv2.imread("test_image.jpg", -1)
 images = cv2.cvtColor(images, cv2.COLOR_BGR2RGB)
 images = input_transform(images)
 
