@@ -8,19 +8,11 @@
 #include <string>
 #include <vector>
 
-cv::Mat tensorToMat(const at::Tensor &one_heat_map)
+cv::Mat tensorToMat(const at::Tensor &t)
 { 
-  //one_heat_map pytorch tensor:(H,W)
-  cv::Mat result(one_heat_map.size(0), one_heat_map.size(1), CV_8UC1);
- 
-  for( int i = 0; i < one_heat_map.size(0); ++i )
- {
-  for(int j=0;j<one_heat_map.size(1);j++)
-  {
-    result.at<char>(i,j)=one_heat_map[i][j].item<int>();
-  }
- }
-  return result;
+    cv::Mat image = cv::Mat(t.sizes()[0], t.sizes()[1], CV_32SC1, t.data_ptr());
+    image.convertTo(image, CV_8UC1);
+    return image;
 }
 
 /* main */
@@ -88,8 +80,12 @@ int main(int argc, const char* argv[])
     std::cout << "out_tensor results:"<<out_tensor.sizes() << '\n';
 
     //std::cout << "C++ inference results:"<<out_tensor<< '\n';
-    std::cout << "the last results:"<<out_tensor[511][511].item<int>()<< '\n';
+    //std::cout << "the last results:"<<out_tensor[511][511].item<int>()<< '\n';
     cv::Mat results = tensorToMat(out_tensor);
+    double minv = 0.0, maxv = 0.0;
+    cv::minMaxIdx(results,  &minv, &maxv);
+    std::cout<<"results max: "<< maxv <<" results min: "<< minv <<std::endl;
+
     cv::imwrite("results/c++_inference.png",results);
     return 0;
 }
