@@ -20,13 +20,13 @@ const int64_t kTrainBatchSize = 64;
 const int64_t kTestBatchSize = 1000;
 
 // The number of epochs to train.
-const int64_t kNumberOfEpochs = 10;
+const int64_t kNumberOfEpochs = 2;
 
 // After how many batches to log a new update with the loss value.
 const int64_t kLogInterval = 10;
 
-struct Net : torch::nn::Module {
-    Net()
+struct NetImpl : torch::nn::Module {
+    NetImpl()
             : conv1(torch::nn::Conv2dOptions(1, 10, /*kernel_size=*/5)),
               conv2(torch::nn::Conv2dOptions(10, 20, /*kernel_size=*/5)),
               fc1(320, 50),
@@ -55,6 +55,8 @@ struct Net : torch::nn::Module {
     torch::nn::Linear fc1;
     torch::nn::Linear fc2;
 };
+TORCH_MODULE(Net); //to save and load  model 
+
 
 template <typename DataLoader>
 void train(
@@ -64,12 +66,12 @@ void train(
         DataLoader& data_loader,
         torch::optim::Optimizer& optimizer,
         size_t dataset_size) {
-    model.train();
+    model->train();
     size_t batch_idx = 0;
     for (auto& batch : data_loader) {
         auto data = batch.data.to(device), targets = batch.target.to(device);
         optimizer.zero_grad();
-        auto output = model.forward(data);
+        auto output = model->forward(data);
         auto loss = torch::nll_loss(output, targets);
         AT_ASSERT(!std::isnan(loss.template item<float>()));
         loss.backward();
@@ -93,12 +95,12 @@ void test(
         DataLoader& data_loader,
         size_t dataset_size) {
     torch::NoGradGuard no_grad;
-    model.eval();
+    model->eval();
     double test_loss = 0;
     int32_t correct = 0;
     for (const auto& batch : data_loader) {
         auto data = batch.data.to(device), targets = batch.target.to(device);
-        auto output = model.forward(data);
+        auto output = model->forward(data);
         test_loss += torch::nll_loss(
                 output,
                 targets,
@@ -130,7 +132,8 @@ auto main() -> int {
     torch::Device device(device_type);
 
     Net model;
-    model.to(device);
+
+    model->to(device);
 
     auto train_dataset = torch::data::datasets::MNIST(kDataRoot)
             .map(torch::data::transforms::Normalize<>(0.1307, 0.3081))
@@ -149,27 +152,18 @@ auto main() -> int {
             torch::data::make_data_loader(std::move(test_dataset), kTestBatchSize);
 
     torch::optim::SGD optimizer(
-            model.parameters(), torch::optim::SGDOptions(0.01).momentum(0.5));
+            model->parameters(), torch::optim::SGDOptions(0.01).momentum(0.5));
 
     for (size_t epoch = 1; epoch <= kNumberOfEpochs; ++epoch) {
         train(epoch, model, device, *train_loader, optimizer, train_dataset_size);
         test(model, device, *test_loader, test_dataset_size);
     }
 
-    //保存模型的权重参数
-//    std::string model_path = "weights.pt";
-//    serialize:OutputArchive output_archive;
-//    model.save(output_archive);
-//    output_archive.save_to(model_path);
-//
-//
-//   //加载模型的权重参数 1.2版本可以
-//    serialize::InputArchive Input_archive;
-//    Input_archive.load_from("weights.pt");
-//    model.load(Input_archive);
+    torch::save(model, "model.pt");//save model
+    torch::load(model, "model.pt");//load model
 
     //print model parameters
-    for (const auto& pair : model.named_parameters()) {
+    for (const auto& pair : model->named_parameters()) {
         std::cout << pair.key() << ": " << pair.value().sizes() << std::endl;
     }
     test(model, device, *test_loader, test_dataset_size);
