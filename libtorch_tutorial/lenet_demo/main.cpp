@@ -25,8 +25,8 @@ const int64_t kNumberOfEpochs = 2;
 // After how many batches to log a new update with the loss value.
 const int64_t kLogInterval = 10;
 
-struct NetImpl : torch::nn::Module {
-    NetImpl()
+struct Net : torch::nn::Module {
+    Net()
             : conv1(torch::nn::Conv2dOptions(1, 10, /*kernel_size=*/5)),
               conv2(torch::nn::Conv2dOptions(10, 20, /*kernel_size=*/5)),
               fc1(320, 50),
@@ -55,13 +55,13 @@ struct NetImpl : torch::nn::Module {
     torch::nn::Linear fc1;
     torch::nn::Linear fc2;
 };
-TORCH_MODULE(Net); //to save and load  model 
+//TORCH_MODULE(Net); //to save and load  model 
 
 
-template <typename DataLoader>
+template <class T, typename DataLoader>
 void train(
         size_t epoch,
-        Net& model,
+        T& model,
         torch::Device device,
         DataLoader& data_loader,
         torch::optim::Optimizer& optimizer,
@@ -88,9 +88,9 @@ void train(
     }
 }
 
-template <typename DataLoader>
+template <class T, typename DataLoader>
 void test(
-        Net& model,
+        T& model,
         torch::Device device,
         DataLoader& data_loader,
         size_t dataset_size) {
@@ -131,7 +131,9 @@ auto main() -> int {
     }
     torch::Device device(device_type);
 
-    Net model;
+//    Net model;
+
+    auto model = std::make_shared<Net>();
 
     model->to(device);
 
