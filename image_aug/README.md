@@ -12,6 +12,8 @@
 ![results](./figs/image_augmentations.png)
 
 
+##数据预处理
+![](./figs/data_augmentions.png)
 ## 如何区分Pillow 和 Pillow-SIMD
 ```base
 # install Pillow-SIMD library
